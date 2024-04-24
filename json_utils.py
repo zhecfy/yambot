@@ -13,12 +13,15 @@ def save_json_to_file(json_object, file_path):
     assert file is not None
     json.dump(json_object, file, ensure_ascii=False, indent=4)
     file.close()
-
     return
 
 def load_file_to_json(file_path):
     file_path = os.path.abspath(file_path)
     # print(f"loading file: {file_path}")
+
+    if not os.path.exists(file_path):
+        return None
+    
     file = open(file_path, "r", encoding='utf-8')
     assert file is not None
     json_object = json.load(file)
