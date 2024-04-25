@@ -1,5 +1,6 @@
 import os
 import argparse
+import logging
 from datetime import datetime
 from mercari.mercari.mercari import search, MercariSort, MercariOrder, MercariSearchStatus, Item
 from email_utils import EmailConfig, send_tracking_email, prettify
@@ -124,6 +125,8 @@ def list_():
 if __name__ == "__main__":
     bot_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(bot_dir)
+    logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
     parser = argparse.ArgumentParser(description="Mercari bot")
     parser.add_argument('action', choices=['add', 'list', 'track'])
     args = parser.parse_args()
@@ -132,4 +135,7 @@ if __name__ == "__main__":
     elif args.action == "list":
         list_()
     elif args.action == 'track':
-        track()
+        try:
+            track()
+        except Exception as e:
+            logging.error(f"An error occurred:\n{e}", exc_info=True)
