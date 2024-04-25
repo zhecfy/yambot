@@ -10,6 +10,8 @@ import imghdr
 
 from mercari.mercari.mercari import MercariItemStatus, Item
 
+from typing import List, Dict, Tuple
+
 class EmailConfig:
     def __init__(self, config_json):
         self.MAIL_HOST = config_json["MAIL_HOST"]
@@ -18,17 +20,23 @@ class EmailConfig:
         self.MAIL_RECEIVER = config_json["MAIL_RECEIVER"]
         self.MAIL_RECEIVERS = [self.MAIL_RECEIVER]
 
-def prettify(status):
-    if status == MercariItemStatus.ITEM_STATUS_ON_SALE:
-        return 'On Sale'
-    elif status == MercariItemStatus.ITEM_STATUS_SOLD_OUT:
-        return 'Sold Out'
-    elif status == MercariItemStatus.ITEM_STATUS_TRADING:
-        return 'Trading'
+def prettify(type: str, value):
+    # print("in prettify", type, value)
+    if type == "status":
+        if value == MercariItemStatus.ITEM_STATUS_ON_SALE:
+            return 'On Sale'
+        elif value == MercariItemStatus.ITEM_STATUS_SOLD_OUT:
+            return 'Sold Out'
+        elif value == MercariItemStatus.ITEM_STATUS_TRADING:
+            return 'Trading'
+        else:
+            return value
+    elif type == "price":
+        return "￥" + str(value)
     else:
-        return status
+        return str(value)
 
-def send_email (config: EmailConfig, searchKeyword: str, searchResult: list[Item]):
+def send_email (config: EmailConfig, searchKeyword: str, searchResult: List[Item]):
     mail_message = MIMEMultipart()
     mail_message["Subject"] = Header(f"Mercari search result for {searchKeyword}", "utf-8")
     mail_message["From"] = f"Mercari bot<{config.MAIL_SENDER}>"
@@ -38,7 +46,7 @@ def send_email (config: EmailConfig, searchKeyword: str, searchResult: list[Item
 
     for item in searchResult:
         html += f"""
-        <p><a href="{item.productURL}">{item.productName}</a> (￥{item.price}, {prettify(item.status)})</p>
+        <p><a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
         <p><img src="cid:{item.id}"></p>"""
 
     html = "<html><body>" + html + "</body></html>"
@@ -55,6 +63,48 @@ def send_email (config: EmailConfig, searchKeyword: str, searchResult: list[Item
         mail_message.attach(image)
     # print(mail_message)
 
+    with smtplib.SMTP_SSL(config.MAIL_HOST, 465) as smtp:
+        # smtp.set_debuglevel(1)
+        smtp.login(config.MAIL_SENDER, config.MAIL_LICENSE)
+        smtp.sendmail(config.MAIL_SENDER, config.MAIL_RECEIVERS, mail_message.as_string())
+        smtp.quit()
+        print("send success")
+
+def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List[Tuple[Item, str]]]]):
+    # email_items: list of tuple(entry, list of tuple(Item, status))
+    mail_message = MIMEMultipart()
+
+    title_keywords = []
+    for (entry, email_entry_items) in email_items:
+        title_keywords.append(entry["keyword"])
+    mail_message["Subject"] = Header(f"Tracking update for {", ".join(title_keywords)}", "utf-8")
+    mail_message["From"] = f"Mercari bot<{config.MAIL_SENDER}>"
+    mail_message["To"] = f"{config.MAIL_RECEIVER}"
+
+    html = ""
+    images = []
+
+    for (entry, email_entry_items) in email_items:
+        entry_html = f"<h2>Tracking update for {str(entry)}</h2>\n"
+        for (item, status) in email_entry_items:
+            # html
+            entry_html += f"""<p>[{status}]<a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
+            <p><img src="cid:{item.id}"></p>\n"""
+
+            # image
+            image_resp = requests.get(item.imageURL).content
+            image_type = imghdr.what(None, image_resp)
+            image = MIMEImage(image_resp, image_type)
+            image.add_header('Content-Disposition', 'inline', filename=('utf-8', 'ja', item.productName + '.' + image_type))
+            image.add_header("Content-ID", f"<{item.id}>")
+            images.append(image)
+        html += entry_html
+    
+    html = "<html><body>" + html + "</body></html>"
+    mail_message.attach(MIMEText(html, 'html'))
+    for image in images:
+        mail_message.attach(image)
+    
     with smtplib.SMTP_SSL(config.MAIL_HOST, 465) as smtp:
         # smtp.set_debuglevel(1)
         smtp.login(config.MAIL_SENDER, config.MAIL_LICENSE)
