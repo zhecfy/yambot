@@ -1,4 +1,4 @@
-CONFIG_PATH = "email_config.json"
+EMAIL_CONFIG_PATH = "email_config.json"
 RESULT_PATH = "track.json"
 
 LEVEL_ABSOLUTE_UNIQUE = 1 # returns all results searched

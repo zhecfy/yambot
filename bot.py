@@ -106,9 +106,7 @@ def track():
             email_items.append((entry, email_entry_items))
     # 2.4. send email
     if len(email_items) > 0:
-        config_json = load_file_to_json(file_path=CONFIG_PATH)
-        email_config = EmailConfig(config_json)
-        send_tracking_email(email_config, email_items)
+        send_tracking_email(EmailConfig(email_config_path=EMAIL_CONFIG_PATH), email_items)
     else:
         print("nothing new")
     

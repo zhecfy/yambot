@@ -8,9 +8,11 @@ from email.header import Header
 from typing import List, Dict, Tuple
 from mercari.mercari.mercari import MercariItemStatus, Item
 from config import *
+from json_utils import load_file_to_json
 
 class EmailConfig:
-    def __init__(self, config_json):
+    def __init__(self, email_config_path):
+        config_json = load_file_to_json(file_path=email_config_path)
         self.MAIL_HOST = config_json["MAIL_HOST"]
         self.MAIL_SENDER = config_json["MAIL_SENDER"]
         self.MAIL_LICENSE = config_json["MAIL_LICENSE"]
