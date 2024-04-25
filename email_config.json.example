@@ -1,6 +1,6 @@
 {
     "MAIL_HOST": "smtp.gmail.com",
     "MAIL_SENDER": "sender@gmail.com",
-    "MAIL_LICENSE": "abcefghijklmnopq",
+    "MAIL_PASSWORD": "abcefghijklmnopq",
     "MAIL_RECEIVER": "receiver@gmail.com"
 }

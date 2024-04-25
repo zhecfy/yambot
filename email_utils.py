@@ -15,7 +15,7 @@ class EmailConfig:
         config_json = load_file_to_json(file_path=email_config_path)
         self.MAIL_HOST = config_json["MAIL_HOST"]
         self.MAIL_SENDER = config_json["MAIL_SENDER"]
-        self.MAIL_LICENSE = config_json["MAIL_LICENSE"]
+        self.MAIL_PASSWORD = config_json["MAIL_PASSWORD"]
         self.MAIL_RECEIVER = config_json["MAIL_RECEIVER"]
         self.MAIL_RECEIVERS = [self.MAIL_RECEIVER]
 
@@ -78,7 +78,7 @@ def send_email (config: EmailConfig, searchKeyword: str, searchResult: List[Item
 
     with smtplib.SMTP_SSL(config.MAIL_HOST, 465) as smtp:
         # smtp.set_debuglevel(1)
-        smtp.login(config.MAIL_SENDER, config.MAIL_LICENSE)
+        smtp.login(config.MAIL_SENDER, config.MAIL_PASSWORD)
         smtp.sendmail(config.MAIL_SENDER, config.MAIL_RECEIVERS, mail_message.as_string())
         smtp.quit()
         print("send success")
@@ -120,7 +120,7 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
     
     with smtplib.SMTP_SSL(config.MAIL_HOST, 465) as smtp:
         # smtp.set_debuglevel(1)
-        smtp.login(config.MAIL_SENDER, config.MAIL_LICENSE)
+        smtp.login(config.MAIL_SENDER, config.MAIL_PASSWORD)
         smtp.sendmail(config.MAIL_SENDER, config.MAIL_RECEIVERS, mail_message.as_string())
         smtp.quit()
         print("send success")

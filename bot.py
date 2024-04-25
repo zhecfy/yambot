@@ -56,7 +56,7 @@ def add():
         else:
             print("level error")
             continue
-    new_entry["category_id"] = int(input(f"category_id of search (None: 0, CD: {CATEGORY_CD}): "))
+    new_entry["category_id"] = int(input(f"category_id of search (all: 0, CD: {CATEGORY_CD}): "))
     
     # 3. initial update
     search_result = update(new_entry)

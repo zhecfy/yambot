@@ -15,7 +15,7 @@ cd mercari-bot/
 cp email_config.json.example email_config.json
 vim email_config.json
 ```
-`MAIL_LICENSE` is the SMTP login password for `MAIL_SENDER`.
+`MAIL_PASSWORD` is the SMTP login password for `MAIL_SENDER`.
 For Gmail, [create and fill in an app password](https://support.google.com/mail/answer/185833).
 
 ### Add a search keyword
