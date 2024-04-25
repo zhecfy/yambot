@@ -19,7 +19,8 @@ def update(entry: dict) -> list[Item]:
                                sort=MercariSort.SORT_SCORE,
                                order=MercariOrder.ORDER_DESC,
                                status=MercariSearchStatus.DEFAULT,
-                               category_id=[entry["category_id"]]))
+                               category_id=[entry["category_id"]],
+                               request_interval=5))
 
     if entry["level"] == LEVEL_ABSOLUTE_UNIQUE:
         filtered_search_result = search_result
