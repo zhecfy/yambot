@@ -25,7 +25,7 @@ def update(entry: dict) -> list[Item]:
     elif entry["level"] == LEVEL_UNIQUE or entry["level"] == LEVEL_AMBIGUOUS:
         filtered_search_result = []
         for item in search_result:
-            if search_keyword in item.productName:
+            if entry["keyword"] in item.productName:
                 filtered_search_result.append(item)
     
     return filtered_search_result    
