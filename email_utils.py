@@ -1,16 +1,13 @@
-import smtplib
 import requests
-
+import smtplib
+import imghdr
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
-
-import imghdr
-
-from mercari.mercari.mercari import MercariItemStatus, Item
-
 from typing import List, Dict, Tuple
+from mercari.mercari.mercari import MercariItemStatus, Item
+from config import *
 
 class EmailConfig:
     def __init__(self, config_json):
@@ -20,7 +17,7 @@ class EmailConfig:
         self.MAIL_RECEIVER = config_json["MAIL_RECEIVER"]
         self.MAIL_RECEIVERS = [self.MAIL_RECEIVER]
 
-def prettify(type: str, value):
+def prettify(type: str, value) -> str:
     # print("in prettify", type, value)
     if type == "status":
         if value == MercariItemStatus.ITEM_STATUS_ON_SALE:
@@ -33,6 +30,20 @@ def prettify(type: str, value):
             return value
     elif type == "price":
         return "￥" + str(value)
+    elif type == "entry":
+        if value["level"] == LEVEL_ABSOLUTE_UNIQUE or value["level"] == LEVEL_UNIQUE:
+            return f"\"{value["keyword"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+        elif value["level"] == LEVEL_AMBIGUOUS:
+            return f"\"{value["keyword"]}\"+\"{value["supplement"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+        else:
+            return str(value)
+    elif type == "category_id":
+        if value == 0:
+            return "all"
+        elif value == CATEGORY_CD:
+            return "CD"
+        else:
+            return str(value)        
     else:
         return str(value)
 
@@ -85,7 +96,7 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
     images = []
 
     for (entry, email_entry_items) in email_items:
-        entry_html = f"<h2>Tracking update for {str(entry)}</h2>\n"
+        entry_html = f"<h2>Tracking update for {prettify("entry", entry)}</h2>\n"
         for (item, status) in email_entry_items:
             # html
             entry_html += f"""<p>[{status}]<a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>

@@ -1,19 +1,10 @@
-from json_utils import load_file_to_json, save_json_to_file
-from mercari.mercari.mercari import search, MercariSort, MercariOrder, MercariSearchStatus, Item
+import os
+import argparse
 from datetime import datetime
+from mercari.mercari.mercari import search, MercariSort, MercariOrder, MercariSearchStatus, Item
 from email_utils import EmailConfig, send_tracking_email, prettify
-
-CONFIG_PATH = "config.json"
-RESULT_PATH = "track.json"
-
-LEVEL_ABSOLUTE_UNIQUE = 1 # returns all results searched
-LEVEL_UNIQUE = 2          # returns results with full keyword in their title
-LEVEL_AMBIGUOUS = 3       # searches with supplemental keywords, returns results with full keyword in their title
-
-CATEGORY_CD = 75
-
-TRACK_STATUS_NEW = "New!!"
-TRACK_STATUS_MODIFIED = "Modified"
+from json_utils import load_file_to_json, save_json_to_file
+from config import *
 
 def update(entry: dict) -> list[Item]:
     if entry["level"] == LEVEL_ABSOLUTE_UNIQUE or entry["level"] == LEVEL_UNIQUE:
@@ -112,8 +103,7 @@ def track():
         entry["last_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         new_track_json.append(entry)
         if len(email_entry_items) > 0:
-            stripped_entry = {key: value for key, value in entry.items() if key in ["id", "keyword", "level", "category_id", "supplement"]}
-            email_items.append((stripped_entry, email_entry_items))
+            email_items.append((entry, email_entry_items))
     # 2.4. send email
     if len(email_items) > 0:
         config_json = load_file_to_json(file_path=CONFIG_PATH)
@@ -126,5 +116,22 @@ def track():
     save_json_to_file(new_track_json, RESULT_PATH)
     return
 
+def list_():
+    track_json = load_file_to_json(file_path=RESULT_PATH)
+    if track_json == None:
+        track_json = []
+    for entry in track_json:
+        print(prettify("entry", entry))
+
 if __name__ == "__main__":
-    track()
+    bot_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(bot_dir)
+    parser = argparse.ArgumentParser(description="Mercari bot")
+    parser.add_argument('action', choices=['add', 'list', 'track'])
+    args = parser.parse_args()
+    if args.action == 'add':
+        add()
+    elif args.action == "list":
+        list_()
+    elif args.action == 'track':
+        track()
