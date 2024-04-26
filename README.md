@@ -12,7 +12,7 @@ git clone --recurse-submodules https://github.com/zhecfy/mercari-bot.git
 ### Install dependencies
 ```bash
 cd mercari-bot/
-pip install -r mercari/requirement.txt
+pip install -r mercari/requirements.txt
 ```
 
 ### Setup email configurations
