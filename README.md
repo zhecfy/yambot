@@ -1,6 +1,6 @@
 # Mercari bot
 
-Never miss anything on your tracklist anymore.
+Never miss anything on your tracking list anymore.
 
 ## Usage
 
