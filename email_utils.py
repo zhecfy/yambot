@@ -33,7 +33,7 @@ def prettify(type: str, value) -> str:
     elif type == "price":
         return "￥" + str(value)
     elif type == "entry":
-        if value["level"] == LEVEL_ABSOLUTE_UNIQUE or value["level"] == LEVEL_UNIQUE:
+        if value["level"] == LEVEL_ABSOLUTELY_UNIQUE or value["level"] == LEVEL_UNIQUE:
             return f"\"{value["keyword"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
         elif value["level"] == LEVEL_AMBIGUOUS:
             return f"\"{value["keyword"]}\"+\"{value["supplement"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"

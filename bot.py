@@ -8,7 +8,7 @@ from json_utils import load_file_to_json, save_json_to_file
 from config import *
 
 def update(entry: dict) -> list[Item]:
-    if entry["level"] == LEVEL_ABSOLUTE_UNIQUE or entry["level"] == LEVEL_UNIQUE:
+    if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE or entry["level"] == LEVEL_UNIQUE:
         search_keyword = entry["keyword"]
     elif entry["level"] == LEVEL_AMBIGUOUS:
         search_keyword = entry["keyword"] + " " + entry["supplement"]
@@ -22,7 +22,7 @@ def update(entry: dict) -> list[Item]:
                                category_id=[entry["category_id"]],
                                request_interval=REQUEST_INTERVAL))
 
-    if entry["level"] == LEVEL_ABSOLUTE_UNIQUE:
+    if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE:
         filtered_search_result = search_result
     elif entry["level"] == LEVEL_UNIQUE or entry["level"] == LEVEL_AMBIGUOUS:
         filtered_search_result = []
@@ -48,7 +48,7 @@ def add():
     new_entry["keyword"] = input("search keyword: ")
     while True:
         level = int(input("keyword's ambiguity level: "))
-        if level == LEVEL_ABSOLUTE_UNIQUE or level == LEVEL_UNIQUE:
+        if level == LEVEL_ABSOLUTELY_UNIQUE or level == LEVEL_UNIQUE:
             new_entry["level"] = level
             break
         elif level == LEVEL_AMBIGUOUS:
