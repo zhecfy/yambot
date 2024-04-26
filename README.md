@@ -9,9 +9,14 @@ Never miss anything on your tracklist anymore.
 git clone --recurse-submodules https://github.com/zhecfy/mercari-bot.git
 ```
 
-### Setup email configurations
+### Install dependencies
 ```bash
 cd mercari-bot/
+pip install -r mercari/requirement.txt
+```
+
+### Setup email configurations
+```bash
 cp email_config.json.example email_config.json
 vim email_config.json
 ```
