@@ -131,12 +131,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Mercari bot")
     parser.add_argument('action', choices=['add', 'list', 'track'])
     args = parser.parse_args()
-    if args.action == 'add':
-        add()
-    elif args.action == "list":
-        list_()
-    elif args.action == 'track':
-        try:
+    try:
+        if args.action == 'add':
+            add()
+        elif args.action == "list":
+            list_()
+        elif args.action == 'track':
             track()
-        except Exception as e:
-            logging.error(f"An error occurred:\n{e}", exc_info=True)
+    except Exception as e:
+        logging.error(f"An error occurred:\n{e}", exc_info=True)
