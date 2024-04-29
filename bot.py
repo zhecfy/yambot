@@ -1,13 +1,14 @@
 import os
 import argparse
 import logging
+from typing import Tuple, List
 from datetime import datetime
 from mercari.mercari.mercari import search, MercariSort, MercariOrder, MercariSearchStatus, Item
 from email_utils import EmailConfig, send_tracking_email, prettify
 from json_utils import load_file_to_json, save_json_to_file
 from config import *
 
-def update(entry: dict) -> list[Item]:
+def update(entry: dict) -> Tuple[bool, List[Item]]:
     if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE or entry["level"] == LEVEL_UNIQUE:
         search_keyword = entry["keyword"]
     elif entry["level"] == LEVEL_AMBIGUOUS:
@@ -15,12 +16,15 @@ def update(entry: dict) -> list[Item]:
     else:
         raise ValueError("unknown level")
 
-    search_result = list(search(search_keyword,
-                               sort=MercariSort.SORT_SCORE,
-                               order=MercariOrder.ORDER_DESC,
-                               status=MercariSearchStatus.DEFAULT,
-                               category_id=[entry["category_id"]],
-                               request_interval=REQUEST_INTERVAL))
+    success, search_result = search(search_keyword,
+                                    sort=MercariSort.SORT_SCORE,
+                                    order=MercariOrder.ORDER_DESC,
+                                    status=MercariSearchStatus.DEFAULT,
+                                    category_id=[entry["category_id"]],
+                                    request_interval=REQUEST_INTERVAL)
+    
+    if not success:
+        return False, []
 
     if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE:
         filtered_search_result = search_result
@@ -30,7 +34,7 @@ def update(entry: dict) -> list[Item]:
             if entry["keyword"].lower() in item.productName.lower():
                 filtered_search_result.append(item)
     
-    return filtered_search_result    
+    return True, filtered_search_result    
 
 def add():
     # 1. read current track.json
@@ -61,7 +65,10 @@ def add():
     new_entry["category_id"] = int(input(f"category_id of search (all: 0, CD: {CATEGORY_CD}): "))
     
     # 3. initial update
-    search_result = update(new_entry)
+    success, search_result = update(new_entry)
+    if not success:
+        print("initial update failed, abort")
+        return
     search_result_dict = {}
     for item in search_result:
         search_result_dict[item.id] = {"price": item.price, "status": item.status}
@@ -74,7 +81,6 @@ def add():
     return
 
 def track():
-    # TODO
     email_items = [] # list of tuple(entry, list of tuple(Item, status))
     # 1. read current track.json
     track_json = load_file_to_json(file_path=RESULT_PATH)
@@ -85,7 +91,11 @@ def track():
     for entry in track_json:
         email_entry_items = []
         # 2.1. update search result
-        search_result = update(entry)
+        success, search_result = update(entry)
+        if not success:
+            logging.error(f"Update of {entry} failed, skipping")
+            new_track_json.append(entry)
+            continue
         # 2.2. compare with last result
         last_search_result_dict = entry["last_result"]
         search_result_dict = {}
