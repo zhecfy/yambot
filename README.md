@@ -1,18 +1,19 @@
-# Mercari bot
+# Yambot
 
-Never miss anything on your tracking list anymore.
+A bot that tracks listings on Yahoo! Auctions and Mercari and sends email updates.
 
 ## Usage
 
 ### Clone the repo
 ```bash
-git clone --recurse-submodules https://github.com/zhecfy/mercari-bot.git
+git clone --recurse-submodules https://github.com/zhecfy/yambot.git
 ```
 
 ### Install dependencies
 ```bash
-cd mercari-bot/
+cd yambot/
 pip install -r mercari/requirements.txt
+pip install -r Yoku/requirements.txt
 ```
 
 ### Setup email configurations
@@ -58,4 +59,5 @@ It depends on the system. For Linux, use crontab.
 
 ## Thanks
 
-[Mercari Wrapper](https://github.com/marvinody/mercari)
+- [mercari](https://github.com/marvinody/mercari): a wrapper around mercari jp shopping site
+- [Yoku](https://github.com/kokseen1/Yoku): A minimal Yahoo! Auctions scraper.
