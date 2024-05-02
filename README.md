@@ -29,13 +29,13 @@ For Gmail, [create and fill in an app password](https://support.google.com/mail/
 python bot.py add
 ```
 
-Then the bot will prompt you to add a search entry interactively.
+Then yambot will prompt you to add a search entry interactively.
 
 ### Search options
 
 #### (Mercari) Ambiguity Levels
 
-Searching on mercari is sometimes quite painful. As long as an item's title and description contain all of the keywords, it may be shown in the search result. Sometimes completely different items with similar names flood the result. Sometimes the kanas in the keyword are incorrectly tokenized. The bot uses different ambiguity levels to determine which items are worth tracking.
+Searching on mercari is sometimes quite painful. As long as an item's title and description contain all of the keywords, it may be shown in the search result. Sometimes completely different items with similar names flood the result. Sometimes the kanas in the keyword are incorrectly tokenized. Yambot uses different ambiguity levels to determine which items are worth tracking.
 
 - Level 1 (Absolutely Unique): track all items
 - Level 2 (Unique): track items with full keyword in their title
@@ -70,6 +70,14 @@ python bot.py track
 ### Track automatically
 
 It depends on the system. For Linux, use crontab.
+
+### What does it track, exactly? When will I get notified?
+
+For mercari listings, yambot tracks attibutes `price` and `status` ("On Sale" or "Sold Out" etc.) for each item.
+
+For yahoo auction listings, yambot tracks attibutes `price` and `endtime` for each item.
+
+Everytime yambot runs the track() function, it updates all search entries. If a new item ID appears or an existing item has some attributes changed, yambot sends an update through email.
 
 ## Thanks
 

@@ -71,7 +71,7 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
     for (entry, email_entry_items) in email_items:
         title_keywords.append(entry["keyword"] if "keyword" in entry else entry["p"])
     mail_message["Subject"] = Header(f"Tracking update for {", ".join(title_keywords)}", "utf-8")
-    mail_message["From"] = f"Mercari bot<{config.MAIL_SENDER}>"
+    mail_message["From"] = f"Yambot<{config.MAIL_SENDER}>"
     mail_message["To"] = f"{config.MAIL_RECEIVER}"
 
     html = ""
