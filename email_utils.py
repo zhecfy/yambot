@@ -7,6 +7,8 @@ from email.mime.multipart import MIMEMultipart
 from email.header import Header
 from typing import List, Dict, Tuple
 from mercari.mercari.mercari import MercariItemStatus, Item
+from Yoku.yoku.consts import KEY_CURRENT_PRICE, KEY_END_TIMESTAMP
+from Yoku.yoku.scrape import prettify_timestamp
 from config import *
 from json_utils import load_file_to_json
 
@@ -30,22 +32,34 @@ def prettify(type: str, value) -> str:
             return 'Trading'
         else:
             return value
-    elif type == "price":
+    elif type == "price" or type == KEY_CURRENT_PRICE:
         return "￥" + str(value)
     elif type == "entry":
-        if value["level"] == LEVEL_ABSOLUTELY_UNIQUE or value["level"] == LEVEL_UNIQUE:
-            return f"\"{value["keyword"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
-        elif value["level"] == LEVEL_AMBIGUOUS:
-            return f"\"{value["keyword"]}\"+\"{value["supplement"]}\" (id: {value["id"]}, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+        if "site" not in value or value["site"] == SITE_MERCARI:
+            if value["level"] == LEVEL_ABSOLUTELY_UNIQUE or value["level"] == LEVEL_UNIQUE:
+                return f"\"{value["keyword"]}\" (id: {value["id"]}, Mercari, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+            elif value["level"] == LEVEL_AMBIGUOUS:
+                return f"\"{value["keyword"]}\"+\"{value["supplement"]}\" (id: {value["id"]}, Mercari, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+        elif value["site"] == SITE_YAHOO_AUCTIONS:
+            return f"\"{value["p"]}\" (id: {value["id"]}, Yahoo! Auctions, Category: {prettify("auccat", value["auccat"])})"
         else:
             return str(value)
     elif type == "category_id":
         if value == 0:
             return "all"
-        elif value == CATEGORY_CD:
+        elif value == MERCARI_CATEGORY_CD:
             return "CD"
         else:
-            return str(value)        
+            return str(value)
+    elif type == "auccat":
+        if value == 0:
+            return "all"
+        elif value == YAHOO_CATEGORY_MUSIC:
+            return "Music"
+        else:
+            return str(value)
+    elif type == KEY_END_TIMESTAMP:
+        return prettify_timestamp(value)
     else:
         return str(value)
 
@@ -89,7 +103,7 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
 
     title_keywords = []
     for (entry, email_entry_items) in email_items:
-        title_keywords.append(entry["keyword"])
+        title_keywords.append(entry["keyword"] if "keyword" in entry else entry["p"])
     mail_message["Subject"] = Header(f"Tracking update for {", ".join(title_keywords)}", "utf-8")
     mail_message["From"] = f"Mercari bot<{config.MAIL_SENDER}>"
     mail_message["To"] = f"{config.MAIL_RECEIVER}"
