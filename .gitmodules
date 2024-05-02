@@ -1,3 +1,6 @@
 [submodule "mercari"]
 	path = mercari
 	url = https://github.com/zhecfy/mercari.git
+[submodule "Yoku"]
+	path = Yoku
+	url = https://github.com/zhecfy/Yoku.git
