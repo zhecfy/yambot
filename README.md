@@ -1,6 +1,6 @@
 # Yambot
 
-A bot that tracks listings on Yahoo! Auctions and Mercari and sends email updates.
+Track listings on Yahoo! Auctions and Mercari and get email updates.
 
 ## Usage
 
@@ -58,7 +58,7 @@ Also, take a look at the generated `track.json`. It's pretty human-readable.
 
 ### Modify the entries manually
 
-More parameters are configurable for yahoo auctions, including `brand_id`, `aucmaxprice`, `s1`, `o1` and `fixed`. See [Yahoo! Auctions URL Parameters Guide (Unofficial)](Yoku/parameters.md) for details.
+More parameters are configurable for yahoo auctions, including `brand_id`, `aucmaxprice`, `s1`, `o1` and `fixed`. See [Yahoo! Auctions URL Parameters Guide (Unofficial)](https://github.com/zhecfy/Yoku/blob/main/parameters.md) for details.
 
 For example, if you want to set the `aucmaxprice` parameter of an entry, just add `"aucmaxprice": 1234,` in the JSON.
 
