@@ -63,40 +63,6 @@ def prettify(type: str, value) -> str:
     else:
         return str(value)
 
-def send_email (config: EmailConfig, searchKeyword: str, searchResult: List[Item]):
-    mail_message = MIMEMultipart()
-    mail_message["Subject"] = Header(f"Mercari search result for {searchKeyword}", "utf-8")
-    mail_message["From"] = f"Mercari bot<{config.MAIL_SENDER}>"
-    mail_message["To"] = f"{config.MAIL_RECEIVER}"
-
-    html = f"""<p>Mercari search result for {searchKeyword}:</p>"""
-
-    for item in searchResult:
-        html += f"""
-        <p><a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
-        <p><img src="cid:{item.id}"></p>"""
-
-    html = "<html><body>" + html + "</body></html>"
-    # print(html)
-    mail_message.attach(MIMEText(html, 'html'))
-
-    for item in searchResult:
-        image_resp = requests.get(item.imageURL).content
-        image_type = imghdr.what(None, image_resp)
-        # print(image_type)
-        image = MIMEImage(image_resp, image_type)
-        image.add_header('Content-Disposition', 'inline', filename=('utf-8', 'ja', item.productName + '.' + image_type))
-        image.add_header("Content-ID", f"<{item.id}>")
-        mail_message.attach(image)
-    # print(mail_message)
-
-    with smtplib.SMTP_SSL(config.MAIL_HOST, 465) as smtp:
-        # smtp.set_debuglevel(1)
-        smtp.login(config.MAIL_SENDER, config.MAIL_PASSWORD)
-        smtp.sendmail(config.MAIL_SENDER, config.MAIL_RECEIVERS, mail_message.as_string())
-        smtp.quit()
-        print("send success")
-
 def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List[Tuple[Item, str]]]]):
     # email_items: list of tuple(entry, list of tuple(Item, status))
     mail_message = MIMEMultipart()
