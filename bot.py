@@ -78,7 +78,7 @@ def add():
 
     # site
     while True:
-        site = input(f"site (m for {SITE_MERCARI}, y for {SITE_YAHOO_AUCTIONS}): ")
+        site = input(f"site ('m' for {SITE_MERCARI}, 'y' for {SITE_YAHOO_AUCTIONS}): ")
         if site == "m":
             new_entry["site"] = SITE_MERCARI
             break
@@ -114,7 +114,7 @@ def add():
     if new_entry["site"] == SITE_MERCARI:
         new_entry["category_id"] = int(input(f"category_id of search (all: 0, CD: {MERCARI_CATEGORY_CD}): "))
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
-        new_entry["auccat"] = int(input(f"aucion category of search (all: 0, Music: {YAHOO_CATEGORY_MUSIC}): "))
+        new_entry["auccat"] = int(input(f"auccat of search (all: 0, Music: {YAHOO_CATEGORY_MUSIC}): "))
     
     # 3. initial update
     success, search_result = update(new_entry)

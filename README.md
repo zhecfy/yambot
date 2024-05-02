@@ -31,22 +31,36 @@ python bot.py add
 
 Then the bot will prompt you to add a search entry interactively.
 
-#### Ambiguity Levels
+### Search options
 
-Searching on mercari is sometimes quite painful. As long as an item's title and description contain all of the keywords, it may be shown in the search result. Sometimes complete different items with similar names flood the result. Sometimes the kanas in the keyword are incorrectly tokenized. The bot uses different ambiguity levels to determine which items are worth tracking.
+#### (Mercari) Ambiguity Levels
+
+Searching on mercari is sometimes quite painful. As long as an item's title and description contain all of the keywords, it may be shown in the search result. Sometimes completely different items with similar names flood the result. Sometimes the kanas in the keyword are incorrectly tokenized. The bot uses different ambiguity levels to determine which items are worth tracking.
 
 - Level 1 (Absolutely Unique): track all items
 - Level 2 (Unique): track items with full keyword in their title
 - Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
 
-#### Category ID
+#### (Mercari) category_id
 
-Same as the カテゴリー option on mercari.
+Set the カテゴリー on mercari and the number after `category_id=` in the URL. For example, the category_id for CD is 75.
+
+#### (Yahoo! Auctions) auccat
+
+Set the カテゴリ on yahoo auctions and the number after `auccat=` in the URL. For example, the auccat for Music is 22152.
 
 ### List current entries
 ```bash
 python bot.py list
 ```
+
+Also, take a look at the generated `track.json`. It's pretty human-readable.
+
+### Modify the entries manually
+
+More parameters are configurable for yahoo auctions, including `brand_id`, `aucmaxprice`, `s1`, `o1` and `fixed`. See [Yahoo! Auctions URL Parameters Guide (Unofficial)](Yoku/parameters.md) for details.
+
+For example, if you want to set the `aucmaxprice` parameter of an entry, just add `"aucmaxprice": 1234,` in the JSON.
 
 ### Track manually
 ```bash
