@@ -1,6 +1,10 @@
 import os
 import sys
+
+bot_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(bot_dir)
 sys.path.append("Yoku")
+
 import argparse
 import logging
 from typing import Tuple, List
@@ -206,8 +210,6 @@ def list_():
         print(prettify("entry", entry))
 
 if __name__ == "__main__":
-    bot_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(bot_dir)
     logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     parser = argparse.ArgumentParser(description="Yambot")
