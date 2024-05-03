@@ -6,9 +6,12 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 from typing import List, Dict, Tuple
+
 from mercari.mercari.mercari import MercariItemStatus, Item
-from Yoku.yoku.consts import KEY_CURRENT_PRICE, KEY_END_TIMESTAMP
+
+from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE
 from Yoku.yoku.scrape import prettify_timestamp
+
 from config import *
 from json_utils import load_file_to_json
 
@@ -21,9 +24,9 @@ class EmailConfig:
         self.MAIL_RECEIVER = config_json["MAIL_RECEIVER"]
         self.MAIL_RECEIVERS = [self.MAIL_RECEIVER]
 
-def prettify(type: str, value) -> str:
-    # print("in prettify", type, value)
-    if type == "status":
+def prettify(type_: str, value) -> str:
+    # print("in prettify", type_, value)
+    if type_ == "status":
         if value == MercariItemStatus.ITEM_STATUS_ON_SALE:
             return 'On Sale'
         elif value == MercariItemStatus.ITEM_STATUS_SOLD_OUT:
@@ -32,9 +35,9 @@ def prettify(type: str, value) -> str:
             return 'Trading'
         else:
             return value
-    elif type == "price" or type == KEY_CURRENT_PRICE:
+    elif type_ == "price" or type_ == KEY_CURRENT_PRICE:
         return "￥" + str(value)
-    elif type == "entry":
+    elif type_ == "entry":
         if "site" not in value or value["site"] == SITE_MERCARI:
             if value["level"] == LEVEL_ABSOLUTELY_UNIQUE or value["level"] == LEVEL_UNIQUE:
                 return f"\"{value["keyword"]}\" (id: {value["id"]}, Mercari, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
@@ -44,22 +47,25 @@ def prettify(type: str, value) -> str:
             return f"\"{value["p"]}\" (id: {value["id"]}, Yahoo! Auctions, Category: {prettify("auccat", value["auccat"])})"
         else:
             return str(value)
-    elif type == "category_id":
+    elif type_ == "category_id":
         if value == 0:
             return "all"
         elif value == MERCARI_CATEGORY_CD:
             return "CD"
         else:
             return str(value)
-    elif type == "auccat":
+    elif type_ == "auccat":
         if value == 0:
             return "all"
         elif value == YAHOO_CATEGORY_MUSIC:
             return "Music"
         else:
             return str(value)
-    elif type == KEY_END_TIMESTAMP:
-        return prettify_timestamp(value)
+    elif type_ == KEY_END_TIMESTAMP:
+        if type(value) == int:
+            return prettify_timestamp(value)
+        else:
+            return str(value)
     else:
         return str(value)
 
@@ -81,15 +87,29 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
         entry_html = f"<h2>Tracking update for {prettify("entry", entry)}</h2>\n"
         for (item, status) in email_entry_items:
             # html
-            entry_html += f"""<p>[{status}]<a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
-            <p><img src="cid:{item.id}"></p>\n"""
+            if "site" not in entry or entry["site"] == SITE_MERCARI:
+                entry_html += f"""<p>[{status}]<a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
+                <p><img src="cid:{item.id}"></p>\n"""
+            elif entry["site"] == SITE_YAHOO_AUCTIONS:
+                entry_html += f"""<p>[{status}]<a href="{item[KEY_URL]}">{item[KEY_TITLE]}</a> ({prettify(KEY_CURRENT_PRICE, item[KEY_CURRENT_PRICE])}, {prettify(KEY_END_TIMESTAMP, item[KEY_END_TIMESTAMP])})</p>
+                <p><img src="cid:{item[KEY_ITEM_ID]}"></p>\n"""
 
             # image
-            image_resp = requests.get(item.imageURL).content
+            if "site" not in entry or entry["site"] == SITE_MERCARI:
+                image_resp = requests.get(item.imageURL).content
+            elif entry["site"] == SITE_YAHOO_AUCTIONS:
+                image_resp = requests.get(item[KEY_IMAGE]).content
+            
             image_type = imghdr.what(None, image_resp)
             image = MIMEImage(image_resp, image_type)
-            image.add_header('Content-Disposition', 'inline', filename=('utf-8', 'ja', item.productName + '.' + image_type))
-            image.add_header("Content-ID", f"<{item.id}>")
+            
+            if "site" not in entry or entry["site"] == SITE_MERCARI:
+                image.add_header('Content-Disposition', 'inline', filename=('utf-8', 'ja', item.productName + '.' + image_type))
+                image.add_header("Content-ID", f"<{item.id}>")
+            elif entry["site"] == SITE_YAHOO_AUCTIONS:
+                image.add_header('Content-Disposition', 'inline', filename=('utf-8', 'ja', item[KEY_TITLE] + '.' + image_type))
+                image.add_header("Content-ID", f"<{item[KEY_ITEM_ID]}>")
+            
             images.append(image)
         html += entry_html
     
