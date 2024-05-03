@@ -9,7 +9,7 @@ from typing import List, Dict, Tuple
 
 from mercari.mercari.mercari import MercariItemStatus, Item
 
-from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE
+from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE, KEY_BID_COUNT
 from Yoku.yoku.scrape import prettify_timestamp
 
 from config import *
@@ -66,6 +66,11 @@ def prettify(type_: str, value) -> str:
             return prettify_timestamp(value)
         else:
             return str(value)
+    elif type_ == KEY_BID_COUNT:
+        if value == 0 or value == 1:
+            return f"{value} bid"
+        else:
+            return f"{value} bids"
     else:
         return str(value)
 
@@ -91,7 +96,7 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
                 entry_html += f"""<p>[{status}]<a href="{item.productURL}">{item.productName}</a> ({prettify("price", item.price)}, {prettify("status", item.status)})</p>
                 <p><img src="cid:{item.id}"></p>\n"""
             elif entry["site"] == SITE_YAHOO_AUCTIONS:
-                entry_html += f"""<p>[{status}]<a href="{item[KEY_URL]}">{item[KEY_TITLE]}</a> ({prettify(KEY_CURRENT_PRICE, item[KEY_CURRENT_PRICE])}, {prettify(KEY_END_TIMESTAMP, item[KEY_END_TIMESTAMP])})</p>
+                entry_html += f"""<p>[{status}]<a href="{item[KEY_URL]}">{item[KEY_TITLE]}</a> ({prettify(KEY_CURRENT_PRICE, item[KEY_CURRENT_PRICE])}, {prettify(KEY_BID_COUNT, item[KEY_BID_COUNT])})</p>
                 <p><img src="cid:{item[KEY_ITEM_ID]}"></p>\n"""
 
             # image

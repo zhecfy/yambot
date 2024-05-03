@@ -75,7 +75,7 @@ It depends on the system. For Linux, use crontab.
 
 For mercari listings, yambot tracks attibutes `price` and `status` ("On Sale" or "Sold Out" etc.) for each item.
 
-For yahoo auction listings, yambot tracks attibutes `price` and `endtime` for each item.
+For yahoo auction listings, yambot tracks attibutes `curr_price` and `bid_count` for each item.
 
 Everytime yambot runs the track() function, it updates all search entries. If a new item ID appears or an existing item has some attributes changed, yambot sends an update through email.
 

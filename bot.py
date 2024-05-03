@@ -13,7 +13,7 @@ from datetime import datetime
 from mercari.mercari.mercari import MercariSort, MercariOrder, MercariSearchStatus, Item
 from mercari.mercari.mercari import search as search_mercari
 
-from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE
+from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE, KEY_BID_COUNT
 from Yoku.yoku.scrape import search as search_yahoo_auctions
 
 from email_utils import EmailConfig, send_tracking_email, prettify
@@ -131,7 +131,7 @@ def add():
             search_result_dict[item.id] = {"price": item.price, "status": item.status}
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
         for item in search_result:
-            search_result_dict[item[KEY_ITEM_ID]] = {"price": item[KEY_CURRENT_PRICE], "endtime": item[KEY_END_TIMESTAMP]}
+            search_result_dict[item[KEY_ITEM_ID]] = {KEY_CURRENT_PRICE: item[KEY_CURRENT_PRICE], KEY_BID_COUNT: item[KEY_BID_COUNT]}
     new_entry["last_result"] = search_result_dict
     new_entry["last_time"] = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
 
@@ -171,19 +171,23 @@ def track():
                 elif search_result_dict[item.id] != last_search_result_dict[item.id]: # Modified
                     modification = []
                     for key in search_result_dict[item.id]:
-                        if search_result_dict[item.id][key] != last_search_result_dict[item.id][key]:
+                        if key not in last_search_result_dict[item[KEY_ITEM_ID]]:
+                            modification.append("None" + "->" + prettify(key, search_result_dict[item[KEY_ITEM_ID]][key]))
+                        elif search_result_dict[item.id][key] != last_search_result_dict[item.id][key]:
                             modification.append(prettify(key, last_search_result_dict[item.id][key]) + "->" + prettify(key, search_result_dict[item.id][key]))
                         # print(key, modification)
                     email_entry_items.append((item, TRACK_STATUS_MODIFIED + "(" + ", ".join(modification) + ")"))
         elif entry["site"] == SITE_YAHOO_AUCTIONS:
             for item in search_result:
-                search_result_dict[item[KEY_ITEM_ID]] = {"price": item[KEY_CURRENT_PRICE], "endtime": item[KEY_END_TIMESTAMP]}
+                search_result_dict[item[KEY_ITEM_ID]] = {KEY_CURRENT_PRICE: item[KEY_CURRENT_PRICE], KEY_BID_COUNT: item[KEY_BID_COUNT]}
                 if item[KEY_ITEM_ID] not in last_search_result_dict: # New
                     email_entry_items.append((item, TRACK_STATUS_NEW))
                 elif search_result_dict[item[KEY_ITEM_ID]] != last_search_result_dict[item[KEY_ITEM_ID]]: # Modified
                     modification = []
                     for key in search_result_dict[item[KEY_ITEM_ID]]:
-                        if search_result_dict[item[KEY_ITEM_ID]][key] != last_search_result_dict[item[KEY_ITEM_ID]][key]:
+                        if key not in last_search_result_dict[item[KEY_ITEM_ID]]:
+                            modification.append("None" + "->" + prettify(key, search_result_dict[item[KEY_ITEM_ID]][key]))
+                        elif search_result_dict[item[KEY_ITEM_ID]][key] != last_search_result_dict[item[KEY_ITEM_ID]][key]:
                             modification.append(prettify(key, last_search_result_dict[item[KEY_ITEM_ID]][key]) + "->" + prettify(key, search_result_dict[item[KEY_ITEM_ID]][key]))
                     email_entry_items.append((item, TRACK_STATUS_MODIFIED + "(" + ", ".join(modification) + ")"))
 
