@@ -171,8 +171,8 @@ def track():
                 elif search_result_dict[item.id] != last_search_result_dict[item.id]: # Modified
                     modification = []
                     for key in search_result_dict[item.id]:
-                        if key not in last_search_result_dict[item[KEY_ITEM_ID]]:
-                            modification.append("None" + "->" + prettify(key, search_result_dict[item[KEY_ITEM_ID]][key]))
+                        if key not in last_search_result_dict[item.id]:
+                            modification.append("None" + "->" + prettify(key, search_result_dict[item.id][key]))
                         elif search_result_dict[item.id][key] != last_search_result_dict[item.id][key]:
                             modification.append(prettify(key, last_search_result_dict[item.id][key]) + "->" + prettify(key, search_result_dict[item.id][key]))
                         # print(key, modification)
