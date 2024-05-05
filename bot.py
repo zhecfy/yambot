@@ -50,8 +50,8 @@ def update(entry: dict) -> Tuple[bool, List]:
         return True, filtered_search_result
     elif entry["site"] == SITE_YAHOO_AUCTIONS:
 
-        parameter_keys = ["p", "auccat", "brand_id", "aucmaxprice", "s1", "o1", "fixed"]
-        parameters = {key: entry[key] for key in parameter_keys if key in entry}
+        not_parameter_keys = ["id", "site", "last_result", "last_time"]
+        parameters = {key: entry[key] for key in entry if key not in not_parameter_keys}
 
         if "auccat" in parameters and parameters["auccat"] == 0:
             parameters.pop("auccat")
