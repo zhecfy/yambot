@@ -140,7 +140,7 @@ def add():
     save_json_to_file(track_json, RESULT_PATH)
     return
 
-def track():
+def track(entry_id=ALL_ENTRIES):
     email_items = [] # list of tuple(entry, list of tuple(Item, status))
     # 1. read current track.json
     track_json = load_file_to_json(file_path=RESULT_PATH)
@@ -149,6 +149,9 @@ def track():
     new_track_json = []
     # 2. for each entry:
     for entry in track_json:
+        if entry_id != ALL_ENTRIES and entry["id"] != entry_id:
+            new_track_json.append(entry)
+            continue
         email_entry_items = []
         # 2.1. update search result
         success, search_result = update(entry)
@@ -217,7 +220,11 @@ if __name__ == "__main__":
     logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     parser = argparse.ArgumentParser(description="Yambot")
-    parser.add_argument('action', choices=['add', 'list', 'track'])
+    subparsers = parser.add_subparsers(dest='action')
+    add_parser = subparsers.add_parser('add')
+    list_parser = subparsers.add_parser('list')
+    track_parser = subparsers.add_parser('track')
+    track_parser.add_argument('--id', type=int, help='Specific entry id to track', default=None)
     args = parser.parse_args()
     try:
         if args.action == 'add':
@@ -225,6 +232,9 @@ if __name__ == "__main__":
         elif args.action == "list":
             list_()
         elif args.action == 'track':
-            track()
+            if args.id:
+                track(entry_id=args.id)
+            else:
+                track()
     except Exception as e:
         logging.error(f"An error occurred:\n{e}", exc_info=True)
