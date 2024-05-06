@@ -29,11 +29,20 @@ def update(entry: dict) -> Tuple[bool, List]:
         else:
             raise ValueError("unknown level")
 
+        category_id = entry["category_id"]
+        if isinstance(entry["category_id"], int): # backwards compatibility
+            category_id = [entry["category_id"]]
+
+        item_condition_id = []
+        if "item_condition_id" in entry:
+            item_condition_id = entry["item_condition_id"]
+
         success, search_result = search_mercari(search_keyword,
                                                 sort=MercariSort.SORT_SCORE,
                                                 order=MercariOrder.ORDER_DESC,
                                                 status=MercariSearchStatus.DEFAULT,
-                                                category_id=[entry["category_id"]],
+                                                category_id=category_id,
+                                                item_condition_id=item_condition_id,
                                                 request_interval=REQUEST_INTERVAL)
         
         if not success:
