@@ -20,6 +20,56 @@ from email_utils import EmailConfig, send_tracking_email, prettify
 from json_utils import load_file_to_json, save_json_to_file
 from config import *
 
+mercari_level_help = """
+Yambot's Ambiguity Levels for Mercari
+- Level 1 (Absolutely Unique): track all items
+- Level 2 (Unique): track items with full keyword in their title
+- Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
+
+"""
+
+mercari_category_help = f"""
+Category of Mercari Items
+Set the カテゴリー and the number after category_id= in the URL.
+CD: {MERCARI_CATEGORY_CD}
+List of integers, seperated with comma. Example: 694,695
+
+"""
+
+yahoo_auctions_category_help = f"""
+Category of Yahoo! Auctions Items
+Set the カテゴリ and the number after auccat= in the URL.
+Music: {YAHOO_CATEGORY_MUSIC}
+One integer.
+
+"""
+
+mercari_condition_help = """
+Conditions of Mercari Items
+- 1: 新品、未使用
+- 2: 未使用に近い
+- 3: 目立った傷や汚れなし
+- 4: やや傷や汚れあり
+- 5: 傷や汚れあり
+- 6: 全体的に状態が悪い
+List of integers, seperated with comma. Example: 3,4,6
+
+"""
+
+yahoo_auctions_condition_help = """
+Conditions of Yahoo! Auctions Items
+- 1: 未使用
+- 2: 中古
+- 3: 未使用に近い
+- 4: 目立った傷や汚れなし
+- 5: やや傷や汚れあり
+- 6: 傷や汚れあり
+- 7: 全体的に状態が悪い
+List of integers, seperated with comma. Example: 3,4,6
+Note: 2 is equivalent to 3,4,5,6,7
+
+"""
+
 def update(entry: dict) -> Tuple[bool, List]:
     if "site" not in entry or entry["site"] == SITE_MERCARI: # for backwards compatibility
         if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE or entry["level"] == LEVEL_UNIQUE:
@@ -29,19 +79,36 @@ def update(entry: dict) -> Tuple[bool, List]:
         else:
             raise ValueError("unknown level")
 
-        category_id = entry["category_id"]
-        if isinstance(entry["category_id"], int): # backwards compatibility
-            category_id = [entry["category_id"]]
-
+        # optional parameters
+        # TODO: Use blacklist instead of whitelist
+        exclude_keyword = ""
+        if "exclude_keyword" in entry:
+            exclude_keyword = entry["exclude_keyword"]
+        category_id = []
+        if "category_id" in entry:
+            if isinstance(entry["category_id"], int): # backwards compatibility, used to use int
+                if entry["category_id"] != 0: # [0] works somehow but better check
+                    category_id = [entry["category_id"]]
+            else:
+                category_id = entry["category_id"]
+        price_max = 0
+        if "price_max" in entry:
+            price_max = entry["price_max"]
+        price_min = 0
+        if "price_min" in entry:
+            price_min = entry["price_min"]
         item_condition_id = []
         if "item_condition_id" in entry:
             item_condition_id = entry["item_condition_id"]
 
-        success, search_result = search_mercari(search_keyword,
+        success, search_result = search_mercari(keywords=search_keyword,
+                                                exclude_keywords=exclude_keyword,
                                                 sort=MercariSort.SORT_SCORE,
                                                 order=MercariOrder.ORDER_DESC,
                                                 status=MercariSearchStatus.DEFAULT,
                                                 category_id=category_id,
+                                                price_max=price_max,
+                                                price_min=price_min,
                                                 item_condition_id=item_condition_id,
                                                 request_interval=REQUEST_INTERVAL)
         
@@ -62,7 +129,7 @@ def update(entry: dict) -> Tuple[bool, List]:
         not_parameter_keys = ["id", "site", "last_result", "last_time"]
         parameters = {key: entry[key] for key in entry if key not in not_parameter_keys}
 
-        if "auccat" in parameters and parameters["auccat"] == 0:
+        if "auccat" in parameters and parameters["auccat"] == 0: # backwards compatibility
             parameters.pop("auccat")
 
         search_result = search_yahoo_auctions(parameters, request_interval=REQUEST_INTERVAL)
@@ -102,23 +169,18 @@ def add():
             print("site error")
             continue
 
+    # search keyword
     # keyword (mercari) or p (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
         new_entry["keyword"] = input("search keyword: ")
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
         new_entry["p"] = input("search keyword: ")
 
-    # level (mercari only)
+    # ambiguity level (mercari only)
     if new_entry["site"] == SITE_MERCARI:
         while True:
-            level = int(input("""**********
-Yambot's Ambiguity Levels for Mercari
-                              
-- Level 1 (Absolutely Unique): track all items
-- Level 2 (Unique): track items with full keyword in their title
-- Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
-**********
-keyword's ambiguity level: """))
+            print(mercari_level_help)
+            level = int(input("keyword's ambiguity level: "))
             if level == LEVEL_ABSOLUTELY_UNIQUE or level == LEVEL_UNIQUE:
                 new_entry["level"] = level
                 break
@@ -130,11 +192,49 @@ keyword's ambiguity level: """))
                 print("level error")
                 continue
     
+    # category, optional
     # category_id (mercari) or auccat (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
-        new_entry["category_id"] = int(input(f"category_id of search (all: 0, CD: {MERCARI_CATEGORY_CD}): "))
+        print(mercari_category_help)
+        input_str = input(f"category (category_id) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["category_id"] = list(map(int, input_str.split(',')))
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
-        new_entry["auccat"] = int(input(f"auccat of search (all: 0, Music: {YAHOO_CATEGORY_MUSIC}): "))
+        print(yahoo_auctions_category_help)
+        input_str = input(f"category (auccat) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["auccat"] = int(input_str)
+
+    # condition (new or used, etc.), optional
+    # item_condition_id (mercari) or istatus (yahoo_auctions)
+    if new_entry["site"] == SITE_MERCARI:
+        print(mercari_condition_help)
+        input_str = input("condition (item_condition_id) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["item_condition_id"] = list(map(int, input_str.split(',')))
+    elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
+        print(yahoo_auctions_condition_help)
+        input_str = input("condition (istatus) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["istatus"] = list(map(int, input_str.split(',')))
+
+    # maximum price, optional
+    # price_max (mercari) or aucmaxprice (yahoo_auctions)
+    if new_entry["site"] == SITE_MERCARI:
+        input_str = input("maximum price (price_max) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["price_max"] = int(input_str)
+    elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
+        input_str = input("maximum price (aucmaxprice) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["aucmaxprice"] = int(input_str)
+
+    # minimum price, optional
+    # price_min (mercari only)
+    if new_entry["site"] == SITE_MERCARI:
+        input_str = input("minimum price (price_min) of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["price_min"] = int(input_str)
     
     # 3. initial update
     success, search_result = update(new_entry)
