@@ -49,7 +49,7 @@ def prettify(type_: str, value) -> str:
             # show optional parameters
             optionals = []
             if "exclude_keyword" in value:
-                optionals.append(f"exclude: {value["exclude_keyword"]}")
+                optionals.append(f"exclude: \"{value["exclude_keyword"]}\"")
             if "category_id" in value and value["category_id"] != 0: # backwards compatibility
                 optionals.append(f"category: {prettify("category_id", value["category_id"])}")
             if "item_condition_id" in value:
@@ -73,7 +73,7 @@ def prettify(type_: str, value) -> str:
             # show optional parameters
             optionals = []
             if "ve" in value:
-                optionals.append(f"exclude: {value["ve"]}")
+                optionals.append(f"exclude: \"{value["ve"]}\"")
             if "auccat" in value and value["auccat"] != 0: # backwards compatibility
                 optionals.append(f"category: {prettify("auccat", value["auccat"])}")
             if "istatus" in value:
