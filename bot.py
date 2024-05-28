@@ -25,7 +25,6 @@ Yambot's Ambiguity Levels for Mercari
 - Level 1 (Absolutely Unique): track all items
 - Level 2 (Unique): track items with full keyword in their title
 - Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
-
 """
 
 mercari_category_help = f"""
@@ -33,7 +32,6 @@ Category of Mercari Items
 Set the カテゴリー and the number after category_id= in the URL.
 CD: {MERCARI_CATEGORY_CD}
 List of integers, seperated with comma. Example: 694,695
-
 """
 
 yahoo_auctions_category_help = f"""
@@ -41,7 +39,6 @@ Category of Yahoo! Auctions Items
 Set the カテゴリ and the number after auccat= in the URL.
 Music: {YAHOO_CATEGORY_MUSIC}
 One integer.
-
 """
 
 mercari_condition_help = """
@@ -53,7 +50,6 @@ Conditions of Mercari Items
 - 5: 傷や汚れあり
 - 6: 全体的に状態が悪い
 List of integers, seperated with comma. Example: 3,4,6
-
 """
 
 yahoo_auctions_condition_help = """
@@ -67,7 +63,6 @@ Conditions of Yahoo! Auctions Items
 - 7: 全体的に状態が悪い
 List of integers, seperated with comma. Example: 3,4,6
 Note: 2 is equivalent to 3,4,5,6,7
-
 """
 
 def update(entry: dict) -> Tuple[bool, List]:
