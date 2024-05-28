@@ -41,11 +41,13 @@ Searching on mercari is sometimes quite painful. As long as an item's title and 
 - Level 2 (Unique): track items with full keyword in their title
 - Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
 
-#### Category of Mercari Items (category_id)
+#### Category of Mercari Items (`category_id`)
 
 Set the カテゴリー on mercari and the number after `category_id=` in the URL. For example, the category_id for CD is 75.
 
-#### Conditions of Mercari Items (item_condition_id)
+List of integers, seperated with comma. Example: 694,695
+
+#### Conditions of Mercari Items (`item_condition_id`)
 
 - 1: 新品、未使用
 - 2: 未使用に近い
@@ -56,11 +58,13 @@ Set the カテゴリー on mercari and the number after `category_id=` in the UR
 
 List of integers, seperated with comma. Example: 3,4,6
 
-#### Category of Yahoo! Auctions Items (auccat)
+#### Category of Yahoo! Auctions Items (`auccat`)
 
 Set the カテゴリ on yahoo auctions and the number after `auccat=` in the URL. For example, the auccat for Music is 22152.
 
-#### Conditions of Yahoo! Auctions Items (istatus)
+One integer.
+
+#### Conditions of Yahoo! Auctions Items (`istatus`)
 
 - 1: 未使用
 - 2: 中古
