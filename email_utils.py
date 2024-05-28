@@ -35,42 +35,106 @@ def prettify(type_: str, value) -> str:
             return 'Trading'
         else:
             return value
-    elif type_ == "price" or type_ == KEY_CURRENT_PRICE:
+    
+    elif type_ == "price" or type_ == KEY_CURRENT_PRICE or type_ == "price_max" or type_ == "price_min" or type_ == "aucmaxprice":
         return "￥" + str(value)
+    
     elif type_ == "entry":
-        if "site" not in value or value["site"] == SITE_MERCARI:
+        if "site" not in value or value["site"] == SITE_MERCARI: # backwards compatibility
             if value["level"] == LEVEL_ABSOLUTELY_UNIQUE or value["level"] == LEVEL_UNIQUE:
-                return f"\"{value["keyword"]}\" (id: {value["id"]}, Mercari, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+                keyword_str = f"\"{value["keyword"]}\""
             elif value["level"] == LEVEL_AMBIGUOUS:
-                return f"\"{value["keyword"]}\"+\"{value["supplement"]}\" (id: {value["id"]}, Mercari, Level: {value["level"]}, Category: {prettify("category_id", value["category_id"])})"
+                keyword_str = f"\"{value["keyword"]}\"+\"{value["supplement"]}\""
+            
+            # show optional parameters
+            optionals = []
+            if "category_id" in value and value["category_id"] != 0: # backwards compatibility
+                optionals.append(f"category: {prettify("category_id", value["category_id"])}")
+            if "item_condition_id" in value:
+                optionals.append(f"condition: {prettify("item_condition_id", value["item_condition_id"])}")
+            if "price_max" in value:
+                optionals.append(f"max price: {prettify("price_max", value["price_max"])}")
+            if "price_min" in value:
+                optionals.append(f"min price: {prettify("price_min", value["price_min"])}")
+            optionals_str = ""
+            if optionals != []:
+                optionals_str = ", " + ", ".join(optionals)
+
+            return f"{value["id"]}. {keyword_str} (Mercari, level: {value["level"]}" + optionals_str + ")"
+        
         elif value["site"] == SITE_YAHOO_AUCTIONS:
-            return f"\"{value["p"]}\" (id: {value["id"]}, Yahoo! Auctions, Category: {prettify("auccat", value["auccat"])})"
+            # show optional parameters
+            optionals = []
+            if "auccat" in value and value["auccat"] != 0: # backwards compatibility
+                optionals.append(f"category: {prettify("auccat", value["auccat"])}")
+            if "istatus" in value:
+                optionals.append(f"condition: {prettify("istatus", value["istatus"])}")
+            if "aucmaxprice" in value:
+                optionals.append(f"max price: {prettify("aucmaxprice", value["aucmaxprice"])}")
+            optionals_str = ""
+            if optionals != []:
+                optionals_str = ", " + ", ".join(optionals)
+
+            return f"{value["id"]}. \"{value["p"]}\" (Yahoo! Auctions" + optionals_str + ")"
+        
         else:
             return str(value)
+    
     elif type_ == "category_id":
-        if value == 0:
+        if value == 0: # deprecated now
             return "all"
         elif value == MERCARI_CATEGORY_CD:
             return "CD"
         else:
             return str(value)
+    
     elif type_ == "auccat":
-        if value == 0:
+        if value == 0: # deprecated now
             return "all"
         elif value == YAHOO_CATEGORY_MUSIC:
             return "Music"
         else:
             return str(value)
+    
+    elif type_ == "item_condition_id":
+        assert isinstance(value, list)
+        condition_dict = {1: "新品、未使用",
+                          2: "未使用に近い",
+                          3: "目立った傷や汚れなし",
+                          4: "やや傷や汚れあり",
+                          5: "傷や汚れあり",
+                          6: "全体的に状態が悪い"}
+        conditions = []
+        for i in value:
+            conditions.append(condition_dict[i])
+        return ", ".join(conditions)
+
+    elif type_ == "istatus":
+        assert isinstance(value, list)
+        istatus_dict = {1: "未使用",
+                        2: "中古",
+                        3: "未使用に近い",
+                        4: "目立った傷や汚れなし",
+                        5: "やや傷や汚れあり",
+                        6: "傷や汚れあり",
+                        7: "全体的に状態が悪い"}
+        conditions = []
+        for i in value:
+            conditions.append(istatus_dict[i])
+        return ", ".join(conditions)
+    
     elif type_ == KEY_END_TIMESTAMP:
         if type(value) == int:
             return prettify_timestamp(value)
         else:
             return str(value)
+    
     elif type_ == KEY_BID_COUNT:
         if value == 0 or value == 1:
             return f"{value} bid"
         else:
             return f"{value} bids"
+    
     else:
         return str(value)
 

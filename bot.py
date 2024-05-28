@@ -28,21 +28,21 @@ Yambot's Ambiguity Levels for Mercari
 """
 
 mercari_category_help = f"""
-Category of Mercari Items
+Category of Mercari Items (category_id)
 Set the カテゴリー and the number after category_id= in the URL.
 CD: {MERCARI_CATEGORY_CD}
 List of integers, seperated with comma. Example: 694,695
 """
 
 yahoo_auctions_category_help = f"""
-Category of Yahoo! Auctions Items
+Category of Yahoo! Auctions Items (auccat)
 Set the カテゴリ and the number after auccat= in the URL.
 Music: {YAHOO_CATEGORY_MUSIC}
 One integer.
 """
 
 mercari_condition_help = """
-Conditions of Mercari Items
+Conditions of Mercari Items (item_condition_id)
 - 1: 新品、未使用
 - 2: 未使用に近い
 - 3: 目立った傷や汚れなし
@@ -53,7 +53,7 @@ List of integers, seperated with comma. Example: 3,4,6
 """
 
 yahoo_auctions_condition_help = """
-Conditions of Yahoo! Auctions Items
+Conditions of Yahoo! Auctions Items (istatus)
 - 1: 未使用
 - 2: 中古
 - 3: 未使用に近い
@@ -191,12 +191,12 @@ def add():
     # category_id (mercari) or auccat (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
         print(mercari_category_help)
-        input_str = input(f"category (category_id) of items, press enter to skip: ")
+        input_str = input(f"category of items, press enter to skip: ")
         if input_str != "":
             new_entry["category_id"] = list(map(int, input_str.split(',')))
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
         print(yahoo_auctions_category_help)
-        input_str = input(f"category (auccat) of items, press enter to skip: ")
+        input_str = input(f"category of items, press enter to skip: ")
         if input_str != "":
             new_entry["auccat"] = int(input_str)
 
@@ -204,30 +204,31 @@ def add():
     # item_condition_id (mercari) or istatus (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
         print(mercari_condition_help)
-        input_str = input("condition (item_condition_id) of items, press enter to skip: ")
+        input_str = input("condition of items, press enter to skip: ")
         if input_str != "":
             new_entry["item_condition_id"] = list(map(int, input_str.split(',')))
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
         print(yahoo_auctions_condition_help)
-        input_str = input("condition (istatus) of items, press enter to skip: ")
+        input_str = input("condition of items, press enter to skip: ")
         if input_str != "":
             new_entry["istatus"] = list(map(int, input_str.split(',')))
 
     # maximum price, optional
     # price_max (mercari) or aucmaxprice (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
-        input_str = input("maximum price (price_max) of items, press enter to skip: ")
+        input_str = input("maximum price of items (in [300, 9999999]), press enter to skip: ")
         if input_str != "":
             new_entry["price_max"] = int(input_str)
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
-        input_str = input("maximum price (aucmaxprice) of items, press enter to skip: ")
+        input_str = input("maximum price of items, press enter to skip: ")
         if input_str != "":
             new_entry["aucmaxprice"] = int(input_str)
 
     # minimum price, optional
-    # price_min (mercari only)
+    # price_min (mercari)
+    # TODO: support min, max and price_type on yahoo auctions
     if new_entry["site"] == SITE_MERCARI:
-        input_str = input("minimum price (price_min) of items, press enter to skip: ")
+        input_str = input("minimum price of items (in [300, 9999999]), press enter to skip: ")
         if input_str != "":
             new_entry["price_min"] = int(input_str)
     
