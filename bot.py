@@ -111,7 +111,14 @@ def add():
     # level (mercari only)
     if new_entry["site"] == SITE_MERCARI:
         while True:
-            level = int(input("keyword's ambiguity level: "))
+            level = int(input("""**********
+Yambot's Ambiguity Levels for Mercari
+                              
+- Level 1 (Absolutely Unique): track all items
+- Level 2 (Unique): track items with full keyword in their title
+- Level 3 (Ambiguous): search with supplemental keywords, track items with full keyword in their title
+**********
+keyword's ambiguity level: """))
             if level == LEVEL_ABSOLUTELY_UNIQUE or level == LEVEL_UNIQUE:
                 new_entry["level"] = level
                 break
