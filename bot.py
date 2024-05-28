@@ -187,6 +187,13 @@ def add():
                 print("level error")
                 continue
     
+    # excluded keyword, optional
+    # exclude_keyword (mercari only)
+    if new_entry["site"] == SITE_MERCARI:
+        input_str = input("excluded keyword: ")
+        if input_str != "":
+            new_entry["exclude_keyword"] = input_str
+    
     # category, optional
     # category_id (mercari) or auccat (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
