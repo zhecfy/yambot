@@ -36,7 +36,7 @@ def prettify(type_: str, value) -> str:
         else:
             return value
     
-    elif type_ == "price" or type_ == KEY_CURRENT_PRICE or type_ == "price_max" or type_ == "price_min" or type_ == "aucmaxprice":
+    elif type_ == "price" or type_ == KEY_CURRENT_PRICE or type_ == "price_max" or type_ == "price_min" or type_ == "max" or type_ == "min":
         return "￥" + str(value)
     
     elif type_ == "entry":
@@ -48,6 +48,8 @@ def prettify(type_: str, value) -> str:
             
             # show optional parameters
             optionals = []
+            if "exclude_keyword" in value:
+                optionals.append(f"exclude: {value["exclude_keyword"]}")
             if "category_id" in value and value["category_id"] != 0: # backwards compatibility
                 optionals.append(f"category: {prettify("category_id", value["category_id"])}")
             if "item_condition_id" in value:
@@ -60,22 +62,31 @@ def prettify(type_: str, value) -> str:
             if optionals != []:
                 optionals_str = ", " + ", ".join(optionals)
 
-            return f"{value["id"]}. {keyword_str} (Mercari, level: {value["level"]}" + optionals_str + ")"
+            return f"{value["id"]}. {keyword_str} (Mercari, level: {value["level"]}{optionals_str})"
         
         elif value["site"] == SITE_YAHOO_AUCTIONS:
+            if "p" in value:
+                keyword_str = f"\"{value["p"]}\""
+            else:
+                keyword_str = f"\"{value["va"]}\""
+
             # show optional parameters
             optionals = []
+            if "ve" in value:
+                optionals.append(f"exclude: {value["ve"]}")
             if "auccat" in value and value["auccat"] != 0: # backwards compatibility
                 optionals.append(f"category: {prettify("auccat", value["auccat"])}")
             if "istatus" in value:
                 optionals.append(f"condition: {prettify("istatus", value["istatus"])}")
-            if "aucmaxprice" in value:
-                optionals.append(f"max price: {prettify("aucmaxprice", value["aucmaxprice"])}")
+            if "max" in value:
+                optionals.append(f"max price: {prettify("max", value["max"])}")
+            if "min" in value:
+                optionals.append(f"min price: {prettify("min", value["min"])}")
             optionals_str = ""
             if optionals != []:
                 optionals_str = ", " + ", ".join(optionals)
 
-            return f"{value["id"]}. \"{value["p"]}\" (Yahoo! Auctions" + optionals_str + ")"
+            return f"{value["id"]}. {keyword_str} (Yahoo! Auctions{optionals_str})"
         
         else:
             return str(value)
@@ -144,7 +155,9 @@ def send_tracking_email (config: EmailConfig, email_items: List[Tuple[Dict, List
 
     title_keywords = []
     for (entry, email_entry_items) in email_items:
-        title_keywords.append(entry["keyword"] if "keyword" in entry else entry["p"])
+        title_keywords.append(entry["keyword"] if "keyword" in entry
+                              else entry["p"] if "p" in entry
+                              else entry["va"])
     mail_message["Subject"] = Header(f"Tracking update for {", ".join(title_keywords)}", "utf-8")
     mail_message["From"] = f"Yambot<{config.MAIL_SENDER}>"
     mail_message["To"] = f"{config.MAIL_RECEIVER}"

@@ -127,6 +127,9 @@ def update(entry: dict) -> Tuple[bool, List]:
         if "auccat" in parameters and parameters["auccat"] == 0: # backwards compatibility
             parameters.pop("auccat")
 
+        if ("min" in parameters or "max" in parameters) and "price_type" not in parameters:
+            parameters["price_type"] = "currentprice"
+
         search_result = search_yahoo_auctions(parameters, request_interval=REQUEST_INTERVAL)
 
         # assume yahoo auction searches always succeed
@@ -165,11 +168,12 @@ def add():
             continue
 
     # search keyword
-    # keyword (mercari) or p (yahoo_auctions)
+    # keyword (mercari) or va (yahoo_auctions)
+    # p for yahoo_auctions is deprecated
     if new_entry["site"] == SITE_MERCARI:
         new_entry["keyword"] = input("search keyword: ")
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
-        new_entry["p"] = input("search keyword: ")
+        new_entry["va"] = input("search keyword: ")
 
     # ambiguity level (mercari only)
     if new_entry["site"] == SITE_MERCARI:
@@ -188,12 +192,16 @@ def add():
                 continue
     
     # excluded keyword, optional
-    # exclude_keyword (mercari only)
+    # exclude_keyword (mercari) or ve (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
         input_str = input("excluded keyword: ")
         if input_str != "":
             new_entry["exclude_keyword"] = input_str
-    
+    if new_entry["site"] == SITE_YAHOO_AUCTIONS:
+        input_str = input("excluded keyword: ")
+        if input_str != "":
+            new_entry["ve"] = input_str
+
     # category, optional
     # category_id (mercari) or auccat (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
@@ -221,7 +229,8 @@ def add():
             new_entry["istatus"] = list(map(int, input_str.split(',')))
 
     # maximum price, optional
-    # price_max (mercari) or aucmaxprice (yahoo_auctions)
+    # price_max (mercari) or max (yahoo_auctions)
+    # aucmaxprice for yahoo_auctions is deprecated
     if new_entry["site"] == SITE_MERCARI:
         input_str = input("maximum price of items (in [300, 9999999]), press enter to skip: ")
         if input_str != "":
@@ -229,15 +238,18 @@ def add():
     elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
         input_str = input("maximum price of items, press enter to skip: ")
         if input_str != "":
-            new_entry["aucmaxprice"] = int(input_str)
+            new_entry["max"] = int(input_str)
 
     # minimum price, optional
-    # price_min (mercari)
-    # TODO: support min, max and price_type on yahoo auctions
+    # price_min (mercari) or min (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
         input_str = input("minimum price of items (in [300, 9999999]), press enter to skip: ")
         if input_str != "":
             new_entry["price_min"] = int(input_str)
+    elif new_entry["site"] == SITE_YAHOO_AUCTIONS:
+        input_str = input("minimum price of items, press enter to skip: ")
+        if input_str != "":
+            new_entry["min"] = int(input_str)
     
     # 3. initial update
     success, search_result = update(new_entry)
