@@ -194,11 +194,11 @@ def add():
     # excluded keyword, optional
     # exclude_keyword (mercari) or ve (yahoo_auctions)
     if new_entry["site"] == SITE_MERCARI:
-        input_str = input("excluded keyword: ")
+        input_str = input("excluded keyword, press enter to skip: ")
         if input_str != "":
             new_entry["exclude_keyword"] = input_str
     if new_entry["site"] == SITE_YAHOO_AUCTIONS:
-        input_str = input("excluded keyword: ")
+        input_str = input("excluded keyword, press enter to skip: ")
         if input_str != "":
             new_entry["ve"] = input_str
 
