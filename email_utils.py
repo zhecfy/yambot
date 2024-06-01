@@ -94,7 +94,7 @@ def prettify(type_: str, value) -> str:
     elif type_ == "category_id":
         if value == 0: # deprecated now
             return "all"
-        elif value == MERCARI_CATEGORY_CD:
+        elif value == MERCARI_CATEGORY_CD or value == [MERCARI_CATEGORY_CD]:
             return "CD"
         else:
             return str(value)
