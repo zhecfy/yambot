@@ -38,6 +38,7 @@ yahoo_auctions_category_help = f"""
 Category of Yahoo! Auctions Items (auccat)
 Set the カテゴリ and the number after auccat= in the URL.
 Music: {YAHOO_CATEGORY_MUSIC}
+CD: {YAHOO_CATEGORY_CD}
 One integer.
 """
 

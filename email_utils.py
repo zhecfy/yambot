@@ -104,6 +104,8 @@ def prettify(type_: str, value) -> str:
             return "all"
         elif value == YAHOO_CATEGORY_MUSIC:
             return "Music"
+        elif value == YAHOO_CATEGORY_CD:
+            return "CD"
         else:
             return str(value)
     
