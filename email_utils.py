@@ -96,6 +96,8 @@ def prettify(type_: str, value) -> str:
             return "all"
         elif value == MERCARI_CATEGORY_CD or value == [MERCARI_CATEGORY_CD]:
             return "CD"
+        elif value == [MERCARI_CATEGORY_BLURAY]:
+            return "Blu-ray"
         else:
             return str(value)
     
