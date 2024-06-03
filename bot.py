@@ -341,11 +341,13 @@ def track(entry_id=ALL_ENTRIES):
     save_json_to_file(new_track_json, RESULT_PATH)
     return
 
-def list_():
+def list_(entry_id=ALL_ENTRIES):
     track_json = load_file_to_json(file_path=RESULT_PATH)
     if track_json == None:
         track_json = []
     for entry in track_json:
+        if entry_id != ALL_ENTRIES and entry["id"] != entry_id:
+            continue
         print(prettify("entry", entry))
 
 if __name__ == "__main__":
@@ -355,6 +357,8 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest='action')
     add_parser = subparsers.add_parser('add')
     list_parser = subparsers.add_parser('list')
+    list_parser.add_argument('--id', type=int, help='Specific entry id to list', default=None)
+    sort_parser = subparsers.add_parser('sort')
     track_parser = subparsers.add_parser('track')
     track_parser.add_argument('--id', type=int, help='Specific entry id to track', default=None)
     args = parser.parse_args()
@@ -362,7 +366,10 @@ if __name__ == "__main__":
         if args.action == 'add':
             add()
         elif args.action == "list":
-            list_()
+            if args.id:
+                list_(entry_id=args.id)
+            else:
+                list_()
         elif args.action == 'track':
             if args.id:
                 track(entry_id=args.id)
