@@ -7,7 +7,7 @@ sys.path.append("Yoku")
 
 import argparse
 import logging
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from datetime import datetime
 
 from mercari.mercari.mercari import MercariSort, MercariOrder, MercariSearchStatus, Item
@@ -350,6 +350,34 @@ def list_(entry_id=ALL_ENTRIES):
             continue
         print(prettify("entry", entry))
 
+def get_keyword(entry: Dict):
+    if "site" not in entry or entry["site"] == SITE_MERCARI:
+        if entry["level"] == LEVEL_ABSOLUTELY_UNIQUE or entry["level"] == LEVEL_UNIQUE:
+            return entry["keyword"]
+        elif entry["level"] == LEVEL_AMBIGUOUS:
+            return f"{entry["keyword"]} {entry["supplement"]}"
+    elif entry["site"] == SITE_YAHOO_AUCTIONS:
+            if "p" in entry:
+                return entry["p"]
+            else:
+                return entry["va"]
+    else:
+        raise ValueError("unknown site")
+
+def sort_():
+    track_json = load_file_to_json(file_path=RESULT_PATH)
+    if track_json == None:
+        track_json = []
+    # for entry in track_json:
+    #     print(prettify("entry", entry))
+    track_json.sort(key=lambda e: get_keyword(e))
+    for i, e in enumerate(track_json, start=1):
+        e["id"] = i
+    for entry in track_json:
+        print(prettify("entry", entry))
+    save_json_to_file(track_json, RESULT_PATH)
+    # list_()
+
 if __name__ == "__main__":
     logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -370,6 +398,8 @@ if __name__ == "__main__":
                 list_(entry_id=args.id)
             else:
                 list_()
+        elif args.action == "sort":
+            sort_()
         elif args.action == 'track':
             if args.id:
                 track(entry_id=args.id)
