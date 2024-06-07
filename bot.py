@@ -10,7 +10,7 @@ import logging
 from typing import Tuple, List, Dict
 from datetime import datetime
 
-from mercari.mercari.mercari import MercariSort, MercariOrder, MercariSearchStatus, Item
+from mercari.mercari.mercari import MercariSort, MercariOrder, MercariSearchStatus, MercariItemStatus
 from mercari.mercari.mercari import search as search_mercari
 
 from Yoku.yoku.consts import KEY_TITLE, KEY_IMAGE, KEY_URL, KEY_POST_TIMESTAMP, KEY_END_TIMESTAMP, KEY_START_TIMESTAMP, KEY_ITEM_ID, KEY_BUYNOW_PRICE, KEY_CURRENT_PRICE, KEY_START_PRICE, KEY_BID_COUNT
@@ -304,6 +304,10 @@ def track(entry_id=ALL_ENTRIES):
                 if item.id not in last_search_result_dict: # New
                     email_entry_items.append((item, TRACK_STATUS_NEW))
                 elif search_result_dict[item.id] != last_search_result_dict[item.id]: # Modified
+                    # Ignore if price changes after sold out
+                    if search_result_dict[item.id]["status"] == MercariItemStatus.ITEM_STATUS_SOLD_OUT and last_search_result_dict[item.id]["status"] == MercariItemStatus.ITEM_STATUS_SOLD_OUT and search_result_dict[item.id]["price"] != last_search_result_dict[item.id]["price"]:
+                        continue
+                    
                     modification = []
                     for key in search_result_dict[item.id]:
                         if key not in last_search_result_dict[item.id]:
