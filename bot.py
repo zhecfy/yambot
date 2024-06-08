@@ -329,6 +329,8 @@ def track(entry_id=ALL_ENTRIES):
                         elif search_result_dict[item[KEY_ITEM_ID]][key] != last_search_result_dict[item[KEY_ITEM_ID]][key]:
                             modification.append(prettify(key, last_search_result_dict[item[KEY_ITEM_ID]][key]) + "->" + prettify(key, search_result_dict[item[KEY_ITEM_ID]][key]))
                     email_entry_items.append((item, TRACK_STATUS_MODIFIED + "(" + ", ".join(modification) + ")"))
+        else:
+            raise ValueError("unknown site")
 
         entry["last_result"] = search_result_dict
         entry["last_time"] = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
@@ -382,17 +384,55 @@ def sort_():
     save_json_to_file(track_json, RESULT_PATH)
     # list_()
 
+def exclude(entry_id, exclude_keyword):
+    track_json = load_file_to_json(file_path=RESULT_PATH)
+    if track_json is None:
+        track_json = []
+
+    entry_found = False
+    for entry in track_json:
+        if entry["id"] == entry_id:
+            entry_found = True
+            if entry["site"] == SITE_MERCARI:
+                if "exclude_keyword" in entry:
+                    entry["exclude_keyword"] += f" {exclude_keyword}"
+                else:
+                    entry["exclude_keyword"] = exclude_keyword
+            elif entry["site"] == SITE_YAHOO_AUCTIONS:
+                if "ve" in entry:
+                    entry["ve"] += f" {exclude_keyword}"
+                else:
+                    entry["ve"] = exclude_keyword
+            else:
+                raise ValueError("unknown site")
+            break
+
+    if entry_found:
+        save_json_to_file(track_json, RESULT_PATH)
+        list_(entry_id)
+    else:
+        print(f"Entry {entry_id} not found")
+
 if __name__ == "__main__":
     logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     parser = argparse.ArgumentParser(description="Yambot")
     subparsers = parser.add_subparsers(dest='action')
+
     add_parser = subparsers.add_parser('add')
+
     list_parser = subparsers.add_parser('list')
     list_parser.add_argument('--id', type=int, help='Specific entry id to list', default=None)
-    sort_parser = subparsers.add_parser('sort')
+
     track_parser = subparsers.add_parser('track')
     track_parser.add_argument('--id', type=int, help='Specific entry id to track', default=None)
+
+    sort_parser = subparsers.add_parser('sort')
+
+    exclude_parser = subparsers.add_parser('exclude')
+    exclude_parser.add_argument('--id', type=int, required=True, help='Specific entry id to exclude keyword from')
+    exclude_parser.add_argument('--keyword', type=str, required=True, help='Keyword to exclude')
+
     args = parser.parse_args()
     try:
         if args.action == 'add':
@@ -409,5 +449,7 @@ if __name__ == "__main__":
                 track(entry_id=args.id)
             else:
                 track()
+        elif args.action == 'exclude':
+            exclude(args.id, args.keyword)
     except Exception as e:
         logging.error(f"An error occurred:\n{e}", exc_info=True)
