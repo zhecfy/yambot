@@ -399,6 +399,10 @@ def exclude(entry_id, exclude_keyword):
                 else:
                     entry["exclude_keyword"] = exclude_keyword
             elif entry["site"] == SITE_YAHOO_AUCTIONS:
+                if "p" in entry:
+                    entry["va"] = entry["p"]
+                    del entry["p"]
+
                 if "ve" in entry:
                     entry["ve"] += f" {exclude_keyword}"
                 else:
