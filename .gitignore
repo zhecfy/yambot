@@ -1,5 +1,7 @@
 email_config.json
-track.json
+track*.json
 __pycache__
 error.log
-test*.py
+test*
+backup/
+backup.sh
